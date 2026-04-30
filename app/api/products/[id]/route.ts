@@ -2,6 +2,9 @@ import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import mongoose from "mongoose";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 async function findProduct(id: string) {
   if (mongoose.Types.ObjectId.isValid(id)) {
     const byObjectId = await Product.findById(id);
@@ -36,6 +39,11 @@ export async function GET(
     await connectDB();
 
     const { id } = await params;
+
+    if (!id) {
+      return Response.json({ message: "Product ID is required" }, { status: 400 });
+    }
+
     const product = await findProduct(id);
 
     if (!product) {
@@ -59,6 +67,11 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+
+    if (!id) {
+      return Response.json({ message: "Product ID is required" }, { status: 400 });
+    }
+
     const product = await findProduct(id);
 
     if (!product) {
@@ -66,7 +79,7 @@ export async function PUT(
     }
 
     const images = Array.isArray(body.images)
-      ? body.images
+      ? body.images.filter(Boolean)
       : body.image
       ? [body.image]
       : [];
@@ -75,11 +88,7 @@ export async function PUT(
     product.name = body.name;
     product.category = body.category;
     product.description = body.description;
-
-    // New system
     product.images = images;
-
-    // Old fallback system
     product.image = images[0] || body.image || "";
 
     await product.save();
@@ -100,6 +109,10 @@ export async function DELETE(
     await connectDB();
 
     const { id } = await params;
+
+    if (!id) {
+      return Response.json({ message: "Product ID is required" }, { status: 400 });
+    }
 
     let deletedProduct = null;
 
