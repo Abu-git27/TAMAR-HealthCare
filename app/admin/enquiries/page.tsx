@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { connectDB } from "@/lib/db";
+import Enquiry from "@/models/Enquiry";
 import AdminLogoutButton from "@/components/AdminLogoutButton";
 import DeleteEnquiryButton from "@/components/DeleteEnquiryButton";
 import MarkContactedButton from "@/components/MarkContactedButton";
 
-type Enquiry = {
+type EnquiryType = {
   _id: string;
   name: string;
   phone: string;
@@ -14,16 +16,12 @@ type Enquiry = {
   createdAt: string;
 };
 
-async function getEnquiries(): Promise<Enquiry[]> {
-  const res = await fetch("http://localhost:3000/api/enquiries", {
-    cache: "no-store",
-  });
+async function getEnquiries(): Promise<EnquiryType[]> {
+  await connectDB();
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch enquiries");
-  }
+  const enquiries = await Enquiry.find().sort({ createdAt: -1 }).lean();
 
-  return res.json();
+  return JSON.parse(JSON.stringify(enquiries));
 }
 
 export default async function EnquiriesPage() {
@@ -31,18 +29,18 @@ export default async function EnquiriesPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-6 md:p-10">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
               Enquiries
             </h1>
 
-            <p className="text-gray-600 mt-2">
+            <p className="mt-2 text-gray-600">
               View and manage customer enquiries submitted through the website.
             </p>
 
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="mt-2 text-sm text-gray-500">
               Total enquiries: {enquiries.length}
             </p>
           </div>
@@ -50,7 +48,7 @@ export default async function EnquiriesPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/products"
-              className="inline-block border px-5 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
+              className="inline-block rounded-xl border px-5 py-3 font-semibold transition hover:bg-gray-100"
             >
               Products
             </Link>
@@ -59,10 +57,10 @@ export default async function EnquiriesPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1300px]">
-              <thead className="bg-gray-100 sticky top-0 z-10">
+              <thead className="sticky top-0 z-10 bg-gray-100">
                 <tr className="text-left text-gray-700">
                   <th className="px-5 py-4 font-semibold">Name</th>
                   <th className="px-5 py-4 font-semibold">Phone</th>
@@ -91,7 +89,7 @@ export default async function EnquiriesPage() {
                       key={e._id}
                       className={`border-t border-gray-200 ${
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      } hover:bg-blue-50 transition`}
+                      } transition hover:bg-blue-50`}
                     >
                       <td className="px-5 py-4 font-medium text-gray-900">
                         {e.name}
@@ -108,19 +106,19 @@ export default async function EnquiriesPage() {
                       </td>
 
                       <td
-                        className="px-5 py-4 text-gray-700 max-w-md truncate"
+                        className="max-w-md truncate px-5 py-4 text-gray-700"
                         title={e.message}
                       >
                         {e.message}
                       </td>
 
-                      <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-5 py-4 text-gray-600">
                         {new Date(e.createdAt).toLocaleDateString()}
                       </td>
 
                       <td className="px-5 py-4">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
                             e.status === "contacted"
                               ? "bg-green-100 text-green-700"
                               : "bg-yellow-100 text-yellow-700"
@@ -138,7 +136,7 @@ export default async function EnquiriesPage() {
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 font-semibold hover:underline"
+                            className="font-semibold text-green-600 hover:underline"
                           >
                             WhatsApp
                           </a>
