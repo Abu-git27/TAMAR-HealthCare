@@ -8,7 +8,7 @@ type ProductType = {
   name: string;
   category: string;
   description: string;
-  image?: string;
+  image: string;
   images?: string[];
 };
 
@@ -17,7 +17,22 @@ async function getProducts(): Promise<ProductType[]> {
 
   const products = await Product.find().sort({ createdAt: 1 }).lean();
 
-  return JSON.parse(JSON.stringify(products));
+  const plainProducts = JSON.parse(JSON.stringify(products));
+
+  return plainProducts.map((product: any) => {
+    const images =
+      product.images && product.images.length > 0
+        ? product.images
+        : product.image
+        ? [product.image]
+        : [];
+
+    return {
+      ...product,
+      image: product.image || images[0] || "",
+      images,
+    };
+  });
 }
 
 export default async function ProductsPage() {
