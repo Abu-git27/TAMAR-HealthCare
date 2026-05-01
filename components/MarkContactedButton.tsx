@@ -19,12 +19,12 @@ export default function MarkContactedButton({
     const newStatus = status === "contacted" ? "new" : "contacted";
 
     try {
-      const res = await fetch("/api/enquiries", {
+      const res = await fetch(`/api/enquiries/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, status: newStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (!res.ok) {

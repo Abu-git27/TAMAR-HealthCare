@@ -13,12 +13,8 @@ export default function DeleteEnquiryButton({ id }: { id: string }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/enquiries", {
+      const res = await fetch(`/api/enquiries/${id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
       });
 
       if (!res.ok) {
