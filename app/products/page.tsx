@@ -9,12 +9,20 @@ type Product = {
   image: string;
 };
 
-async function getProducts(): Promise<Product[]> {
-  // ✅ FIX: use dynamic base URL
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL;
+  }
 
-  const res = await fetch(`${baseUrl}/api/products`, {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "http://localhost:3000";
+}
+
+async function getProducts(): Promise<Product[]> {
+  const res = await fetch(`${getBaseUrl()}/api/products`, {
     cache: "no-store",
   });
 
@@ -29,27 +37,24 @@ export default async function ProductsPage() {
   const products = await getProducts();
 
   return (
-    <main className="bg-[#F8FAFC] min-h-screen">
-
-      {/* HERO */}
-      <section className="bg-[#0B2E4F] text-white py-16 px-6 md:px-10 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold">
+    <main className="min-h-screen bg-[#F8FAFC]">
+      <section className="bg-[#0B2E4F] px-6 py-16 text-center text-white md:px-10">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="text-4xl font-bold md:text-5xl">
             Our Medical Products
           </h1>
 
-          <p className="mt-4 text-gray-300 max-w-2xl mx-auto">
+          <p className="mx-auto mt-4 max-w-2xl text-gray-300">
             Explore TAMAR’s range of reliable medical equipment for hospitals,
             clinics, and healthcare centers.
           </p>
         </div>
       </section>
 
-      {/* PRODUCTS GRID */}
-      <section className="py-16 px-6 md:px-10">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-6 py-16 md:px-10">
+        <div className="mx-auto max-w-6xl">
           {products.length === 0 ? (
-            <div className="text-center text-gray-600 text-lg">
+            <div className="text-center text-lg text-gray-600">
               No products available right now.
             </div>
           ) : (
@@ -58,25 +63,23 @@ export default async function ProductsPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-[#0B2E4F] text-white py-16 px-6 text-center">
+      <section className="bg-[#0B2E4F] px-6 py-16 text-center text-white">
         <h2 className="text-3xl font-bold">
           Looking for the Right Medical Equipment?
         </h2>
 
-        <p className="mt-4 text-gray-300 max-w-xl mx-auto">
+        <p className="mx-auto mt-4 max-w-xl text-gray-300">
           Contact TAMAR Healthcare for product details, pricing, and expert
           support.
         </p>
 
         <a
           href="/enquiry"
-          className="inline-block mt-6 bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-semibold hover:scale-105 transition"
+          className="mt-6 inline-block rounded-xl bg-[#D4AF37] px-6 py-3 font-semibold text-black transition hover:scale-105"
         >
           Enquire Now
         </a>
       </section>
-
     </main>
   );
 }

@@ -13,14 +13,23 @@ type Product = {
   images?: string[];
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
-async function getProduct(id: string): Promise<Product> {
-  if (!id) {
-    notFound();
+// ✅ FIXED BASE URL
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL;
   }
 
-  const res = await fetch(`${BASE_URL}/api/products/${id}`, {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "http://localhost:3000";
+}
+
+async function getProduct(id: string): Promise<Product> {
+  if (!id) notFound();
+
+  const res = await fetch(`${getBaseUrl()}/api/products/${id}`, {
     cache: "no-store",
   });
 
@@ -31,7 +40,7 @@ async function getProduct(id: string): Promise<Product> {
 }
 
 async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${BASE_URL}/api/products`, {
+  const res = await fetch(`${getBaseUrl()}/api/products`, {
     cache: "no-store",
   });
 
@@ -107,12 +116,10 @@ export default async function ProductDetail({
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-md md:grid-cols-2 md:p-10">
             <div className="flex items-center justify-center rounded-2xl border bg-white p-6">
-              <div className="w-full">
-                <ProductImageGallery
-                  images={productImages}
-                  productName={product.name}
-                />
-              </div>
+              <ProductImageGallery
+                images={productImages}
+                productName={product.name}
+              />
             </div>
 
             <div className="flex flex-col justify-center">
@@ -155,6 +162,7 @@ export default async function ProductDetail({
             </div>
           </div>
 
+          {/* Optional: remove if you separated enquiry page */}
           <div className="mt-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-md md:p-8">
             <EnquiryForm productName={product.name} />
           </div>
@@ -167,10 +175,6 @@ export default async function ProductDetail({
             <h2 className="text-center text-3xl font-bold text-[#0B2E4F]">
               Related Products
             </h2>
-
-            <p className="mt-3 text-center text-gray-600">
-              Similar products from {product.category}
-            </p>
 
             <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {relatedProducts.map((relatedProduct) => (
