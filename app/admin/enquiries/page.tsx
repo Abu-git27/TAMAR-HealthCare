@@ -1,14 +1,8 @@
-import Link from "next/link";
-import { unstable_noStore as noStore } from "next/cache";
-import { connectDB } from "@/lib/db";
-import Enquiry from "@/models/Enquiry";
-import AdminLogoutButton from "@/components/AdminLogoutButton";
-import DeleteEnquiryButton from "@/components/DeleteEnquiryButton";
-import MarkContactedButton from "@/components/MarkContactedButton";
+"use client";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import AdminLogoutButton from "@/components/AdminLogoutButton";
 
 type EnquiryType = {
   _id: string;
@@ -21,22 +15,69 @@ type EnquiryType = {
   createdAt: string;
 };
 
-async function getEnquiries(): Promise<EnquiryType[]> {
-  noStore();
+export default function EnquiriesPage() {
+  const [enquiries, setEnquiries] = useState<EnquiryType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  await connectDB();
+  async function loadEnquiries() {
+    try {
+      setLoading(true);
 
-  const enquiries = await Enquiry.find()
-    .sort({ createdAt: -1 })
-    .lean();
+      const res = await fetch(`/api/enquiries?time=${Date.now()}`, {
+        cache: "no-store",
+      });
 
-  return JSON.parse(JSON.stringify(enquiries));
-}
+      if (!res.ok) {
+        alert("Failed to load enquiries");
+        return;
+      }
 
-export default async function EnquiriesPage() {
-  noStore();
+      const data = await res.json();
+      setEnquiries(data);
+    } catch {
+      alert("Something went wrong while loading enquiries");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const enquiries = await getEnquiries();
+  useEffect(() => {
+    loadEnquiries();
+  }, []);
+
+  async function deleteEnquiry(id: string) {
+    if (!confirm("Are you sure you want to delete this enquiry?")) return;
+
+    const res = await fetch(`/api/enquiries/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      alert("Failed to delete enquiry");
+      return;
+    }
+
+    await loadEnquiries();
+  }
+
+  async function updateStatus(id: string, currentStatus?: string) {
+    const newStatus = currentStatus === "contacted" ? "new" : "contacted";
+
+    const res = await fetch(`/api/enquiries/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (!res.ok) {
+      alert("Failed to update status");
+      return;
+    }
+
+    await loadEnquiries();
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 p-6 md:p-10">
@@ -85,7 +126,13 @@ export default async function EnquiriesPage() {
               </thead>
 
               <tbody>
-                {enquiries.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="px-5 py-10 text-center">
+                      Loading enquiries...
+                    </td>
+                  </tr>
+                ) : enquiries.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
@@ -152,9 +199,27 @@ export default async function EnquiriesPage() {
                             WhatsApp
                           </a>
 
-                          <MarkContactedButton id={e._id} status={e.status} />
+                          <button
+                            type="button"
+                            onClick={() => updateStatus(e._id, e.status)}
+                            className={`font-semibold hover:underline ${
+                              e.status === "contacted"
+                                ? "text-orange-600"
+                                : "text-blue-600"
+                            }`}
+                          >
+                            {e.status === "contacted"
+                              ? "Mark New"
+                              : "Mark Contacted"}
+                          </button>
 
-                          <DeleteEnquiryButton id={e._id} />
+                          <button
+                            type="button"
+                            onClick={() => deleteEnquiry(e._id)}
+                            className="font-semibold text-red-600 hover:underline"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
