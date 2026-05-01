@@ -9,7 +9,7 @@ type ProductType = {
   category: string;
   description: string;
   image: string;
-  images?: string[];
+  images: string[];
 };
 
 async function getProducts(): Promise<ProductType[]> {
@@ -28,7 +28,11 @@ async function getProducts(): Promise<ProductType[]> {
         : [];
 
     return {
-      ...product,
+      _id: product._id,
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      description: product.description,
       image: product.image || images[0] || "",
       images,
     };
