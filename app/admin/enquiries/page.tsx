@@ -5,6 +5,10 @@ import AdminLogoutButton from "@/components/AdminLogoutButton";
 import DeleteEnquiryButton from "@/components/DeleteEnquiryButton";
 import MarkContactedButton from "@/components/MarkContactedButton";
 
+// 🔥 VERY IMPORTANT (Fix cache issue)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type EnquiryType = {
   _id: string;
   name: string;
@@ -19,7 +23,9 @@ type EnquiryType = {
 async function getEnquiries(): Promise<EnquiryType[]> {
   await connectDB();
 
-  const enquiries = await Enquiry.find().sort({ createdAt: -1 }).lean();
+  const enquiries = await Enquiry.find()
+    .sort({ createdAt: -1 })
+    .lean();
 
   return JSON.parse(JSON.stringify(enquiries));
 }
