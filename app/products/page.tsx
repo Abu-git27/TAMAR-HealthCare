@@ -1,36 +1,23 @@
+import { connectDB } from "@/lib/db";
+import Product from "@/models/Product";
 import ProductFilterGrid from "@/components/ProductFilterGrid";
 
-type Product = {
+type ProductType = {
   _id: string;
   id: string;
   name: string;
   category: string;
   description: string;
-  image: string;
+  image?: string;
+  images?: string[];
 };
 
-function getBaseUrl() {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
+async function getProducts(): Promise<ProductType[]> {
+  await connectDB();
 
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL;
-  }
+  const products = await Product.find().sort({ createdAt: 1 }).lean();
 
-  return "http://localhost:3000";
-}
-
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${getBaseUrl()}/api/products`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
-
-  return res.json();
+  return JSON.parse(JSON.stringify(products));
 }
 
 export default async function ProductsPage() {
