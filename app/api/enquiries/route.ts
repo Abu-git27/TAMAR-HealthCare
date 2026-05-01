@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Enquiry from "@/models/Enquiry";
+import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
       organization: organization || "",
       productName,
       message,
+      status: "new",
     });
 
     return Response.json(
@@ -32,7 +34,6 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Enquiry API POST error:", error);
-
     return Response.json(
       { message: "Failed to submit enquiry" },
       { status: 500 }
@@ -49,7 +50,6 @@ export async function GET() {
     return Response.json(enquiries);
   } catch (error) {
     console.error("Enquiry API GET error:", error);
-
     return Response.json(
       { message: "Failed to fetch enquiries" },
       { status: 500 }
@@ -63,19 +63,25 @@ export async function DELETE(request: Request) {
 
     const { id } = await request.json();
 
-    if (!id) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return Response.json(
-        { message: "Enquiry ID is required" },
+        { message: "Valid enquiry ID is required" },
         { status: 400 }
       );
     }
 
-    await Enquiry.findByIdAndDelete(id);
+    const deletedEnquiry = await Enquiry.findByIdAndDelete(id);
+
+    if (!deletedEnquiry) {
+      return Response.json(
+        { message: "Enquiry not found" },
+        { status: 404 }
+      );
+    }
 
     return Response.json({ message: "Enquiry deleted successfully" });
   } catch (error) {
     console.error("Enquiry API DELETE error:", error);
-
     return Response.json(
       { message: "Failed to delete enquiry" },
       { status: 500 }
@@ -89,9 +95,16 @@ export async function PATCH(request: Request) {
 
     const { id, status } = await request.json();
 
-    if (!id || !status) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return Response.json(
-        { message: "Enquiry ID and status are required" },
+        { message: "Valid enquiry ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!status || !["new", "contacted"].includes(status)) {
+      return Response.json(
+        { message: "Valid status is required" },
         { status: 400 }
       );
     }
@@ -102,13 +115,19 @@ export async function PATCH(request: Request) {
       { new: true }
     );
 
+    if (!enquiry) {
+      return Response.json(
+        { message: "Enquiry not found" },
+        { status: 404 }
+      );
+    }
+
     return Response.json({
       message: "Enquiry status updated successfully",
       enquiry,
     });
   } catch (error) {
     console.error("Enquiry API PATCH error:", error);
-
     return Response.json(
       { message: "Failed to update enquiry status" },
       { status: 500 }

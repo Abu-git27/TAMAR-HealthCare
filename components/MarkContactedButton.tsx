@@ -18,25 +18,33 @@ export default function MarkContactedButton({
 
     const newStatus = status === "contacted" ? "new" : "contacted";
 
-    const res = await fetch("/api/enquiries", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, status: newStatus }),
-    });
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
 
-    setLoading(false);
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Failed to update status");
+        return;
+      }
 
-    if (res.ok) {
       router.refresh();
-    } else {
-      alert("Failed to update status");
+      window.location.reload();
+    } catch {
+      alert("Something went wrong while updating");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={loading}
       className={`font-semibold hover:underline disabled:opacity-50 ${
