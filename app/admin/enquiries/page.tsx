@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { connectDB } from "@/lib/db";
 import Enquiry from "@/models/Enquiry";
 import AdminLogoutButton from "@/components/AdminLogoutButton";
 import DeleteEnquiryButton from "@/components/DeleteEnquiryButton";
 import MarkContactedButton from "@/components/MarkContactedButton";
 
-// 🔥 VERY IMPORTANT (Fix cache issue)
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 type EnquiryType = {
   _id: string;
@@ -21,6 +22,8 @@ type EnquiryType = {
 };
 
 async function getEnquiries(): Promise<EnquiryType[]> {
+  noStore();
+
   await connectDB();
 
   const enquiries = await Enquiry.find()
@@ -31,6 +34,8 @@ async function getEnquiries(): Promise<EnquiryType[]> {
 }
 
 export default async function EnquiriesPage() {
+  noStore();
+
   const enquiries = await getEnquiries();
 
   return (
