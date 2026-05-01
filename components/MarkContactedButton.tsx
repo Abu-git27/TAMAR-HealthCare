@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function MarkContactedButton({
@@ -10,7 +9,6 @@ export default function MarkContactedButton({
   id: string;
   status?: string;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
@@ -24,17 +22,16 @@ export default function MarkContactedButton({
         headers: {
           "Content-Type": "application/json",
         },
+        cache: "no-store",
         body: JSON.stringify({ status: newStatus }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        alert(data.message || "Failed to update status");
+        alert("Failed to update status");
         return;
       }
 
-      router.refresh();
-      window.location.reload();
+      window.location.href = `/admin/enquiries?refresh=${Date.now()}`;
     } catch {
       alert("Something went wrong while updating");
     } finally {

@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function DeleteEnquiryButton({ id }: { id: string }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
@@ -15,16 +13,15 @@ export default function DeleteEnquiryButton({ id }: { id: string }) {
     try {
       const res = await fetch(`/api/enquiries/${id}`, {
         method: "DELETE",
+        cache: "no-store",
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        alert(data.message || "Failed to delete enquiry");
+        alert("Failed to delete enquiry");
         return;
       }
 
-      router.refresh();
-      window.location.reload();
+      window.location.href = `/admin/enquiries?refresh=${Date.now()}`;
     } catch {
       alert("Something went wrong while deleting");
     } finally {
