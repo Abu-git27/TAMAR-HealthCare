@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
+
     const file = formData.get("file") as File | null;
 
     if (!file) {
@@ -29,17 +32,21 @@ export async function POST(request: Request) {
 
     const result = await cloudinary.uploader.upload(base64Image, {
       folder: "tamar-products",
+      resource_type: "image",
     });
 
     return NextResponse.json({
-      message: "Image uploaded successfully",
+      success: true,
       imageUrl: result.secure_url,
     });
   } catch (error) {
     console.error("Upload error:", error);
 
     return NextResponse.json(
-      { message: "Image upload failed" },
+      {
+        success: false,
+        message: "Image upload failed",
+      },
       { status: 500 }
     );
   }
