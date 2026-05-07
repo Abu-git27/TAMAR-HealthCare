@@ -11,19 +11,21 @@ type EnquiryType = {
   organization?: string;
   productName: string;
   message: string;
-  status?: string;
+  status?: "new" | "contacted";
   createdAt: string;
 };
 
 export default function EnquiriesPage() {
   const [enquiries, setEnquiries] = useState<EnquiryType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   async function loadEnquiries() {
     try {
       setLoading(true);
 
       const res = await fetch(`/api/enquiries?time=${Date.now()}`, {
+        method: "GET",
         cache: "no-store",
       });
 
@@ -34,7 +36,8 @@ export default function EnquiriesPage() {
 
       const data = await res.json();
       setEnquiries(data);
-    } catch {
+    } catch (error) {
+      console.error(error);
       alert("Something went wrong while loading enquiries");
     } finally {
       setLoading(false);
@@ -48,35 +51,63 @@ export default function EnquiriesPage() {
   async function deleteEnquiry(id: string) {
     if (!confirm("Are you sure you want to delete this enquiry?")) return;
 
-    const res = await fetch(`/api/enquiries/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      setProcessingId(id);
 
-    if (!res.ok) {
-      alert("Failed to delete enquiry");
-      return;
+      const res = await fetch(`/api/enquiries/${id}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to delete enquiry");
+        return;
+      }
+
+      setEnquiries((prev) => prev.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong while deleting enquiry");
+    } finally {
+      setProcessingId(null);
     }
-
-    await loadEnquiries();
   }
 
   async function updateStatus(id: string, currentStatus?: string) {
     const newStatus = currentStatus === "contacted" ? "new" : "contacted";
 
-    const res = await fetch(`/api/enquiries/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
-    });
+    try {
+      setProcessingId(id);
 
-    if (!res.ok) {
-      alert("Failed to update status");
-      return;
+      const res = await fetch(`/api/enquiries/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to update status");
+        return;
+      }
+
+      setEnquiries((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, status: newStatus } : item
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong while updating status");
+    } finally {
+      setProcessingId(null);
     }
-
-    await loadEnquiries();
   }
 
   return (
@@ -134,10 +165,7 @@ export default function EnquiriesPage() {
                   </tr>
                 ) : enquiries.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="px-5 py-10 text-center text-gray-500"
-                    >
+                    <td colSpan={8} className="px-5 py-10 text-center text-gray-500">
                       No enquiries yet
                     </td>
                   </tr>
@@ -201,24 +229,28 @@ export default function EnquiriesPage() {
 
                           <button
                             type="button"
+                            disabled={processingId === e._id}
                             onClick={() => updateStatus(e._id, e.status)}
-                            className={`font-semibold hover:underline ${
+                            className={`font-semibold hover:underline disabled:opacity-50 ${
                               e.status === "contacted"
                                 ? "text-orange-600"
                                 : "text-blue-600"
                             }`}
                           >
-                            {e.status === "contacted"
+                            {processingId === e._id
+                              ? "Updating..."
+                              : e.status === "contacted"
                               ? "Mark New"
                               : "Mark Contacted"}
                           </button>
 
                           <button
                             type="button"
+                            disabled={processingId === e._id}
                             onClick={() => deleteEnquiry(e._id)}
-                            className="font-semibold text-red-600 hover:underline"
+                            className="font-semibold text-red-600 hover:underline disabled:opacity-50"
                           >
-                            Delete
+                            {processingId === e._id ? "Deleting..." : "Delete"}
                           </button>
                         </div>
                       </td>
