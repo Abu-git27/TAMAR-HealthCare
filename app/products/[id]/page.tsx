@@ -121,7 +121,7 @@ export default async function ProductDetail({
 
       <section className="px-6 py-16 md:px-10">
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-md md:grid-cols-2 md:p-10">
+          <div className="grid gap-6 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-md md:grid-cols-2 md:p-10">
             <div className="flex items-center justify-center rounded-2xl border bg-white p-6">
               <ProductImageGallery
                 images={productImages}

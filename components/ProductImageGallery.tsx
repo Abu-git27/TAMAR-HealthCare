@@ -28,7 +28,7 @@ export default function ProductImageGallery({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-full overflow-hidden">
       <div className="flex h-[460px] w-full items-center justify-center overflow-hidden rounded-xl border bg-white p-4">
         <img
           src={selectedImage}
@@ -38,7 +38,7 @@ export default function ProductImageGallery({
       </div>
 
       {cleanImages.length > 1 && (
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+        <div className="mt-4 flex gap-3 overflow-x-auto pb-2 max-w-full">
           {cleanImages.map((img, index) => (
             <button
               key={`${img}-${index}`}
