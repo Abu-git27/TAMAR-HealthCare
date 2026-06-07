@@ -43,12 +43,12 @@ export default function ContactPage() {
             <div>
               <p className="font-semibold text-gray-900">Phone / WhatsApp</p>
               <a
-                href="https://wa.me/917010597945"
+                href="https://wa.me/919381555114"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-[#D4AF37]"
               >
-                +91 70105 97945
+                +91 9381555114
               </a>
             </div>
 
@@ -82,7 +82,7 @@ export default function ContactPage() {
 
           <div className="mt-8 flex flex-wrap gap-4">
             <a
-              href="https://wa.me/917010597945?text=Hello%20TAMAR%20Healthcare,%20I%20need%20details%20about%20your%20medical%20equipment%20and%20services."
+              href="https://wa.me/919381555114?text=Hello%20TAMAR%20Healthcare,%20I%20need%20details%20about%20your%20medical%20equipment%20and%20services."
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700"
