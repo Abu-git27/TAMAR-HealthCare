@@ -10,7 +10,6 @@ export default function ProductImageGallery({
   productName: string;
 }) {
   const cleanImages = images?.filter(Boolean) || [];
-
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
@@ -19,52 +18,42 @@ export default function ProductImageGallery({
 
   const selectedImage = cleanImages[selectedIndex];
 
-  if (cleanImages.length === 0 || !selectedImage) {
+  if (!selectedImage) {
     return (
-      <div className="flex h-[460px] items-center justify-center rounded-xl border bg-white text-gray-400">
+      <div className="flex h-72 w-full items-center justify-center rounded-xl border bg-white text-gray-500 sm:h-[420px]">
         No image available
       </div>
     );
   }
 
   return (
-    <div className="w-full">
-      {/* BIG IMAGE */}
-      <div className="flex h-[460px] w-full items-center justify-center overflow-hidden rounded-xl border bg-white p-4">
+    <div className="w-full max-w-full overflow-hidden">
+      <div className="flex h-72 w-full items-center justify-center overflow-hidden rounded-xl border bg-white p-3 sm:h-[420px] md:h-[460px]">
         <img
           src={selectedImage}
           alt={productName}
-          className="h-full w-full object-contain"
+          className="max-h-full max-w-full object-contain"
         />
       </div>
 
-      {/* THUMBNAILS */}
       {cleanImages.length > 1 && (
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+        <div className="mt-4 flex max-w-full gap-3 overflow-x-auto pb-3">
           {cleanImages.map((img, index) => (
             <button
               key={`${img}-${index}`}
               type="button"
               onClick={() => setSelectedIndex(index)}
-              style={{
-                width: "120px",
-                height: "120px",
-                minWidth: "120px",
-                flex: "0 0 120px",
-              }}
-              className={`flex items-center justify-center overflow-hidden rounded-lg border bg-white p-2 ${
+              className={`flex h-24 min-w-24 items-center justify-center overflow-hidden rounded-lg border bg-white p-2 sm:h-28 sm:min-w-28 ${
                 selectedIndex === index
-                  ? "ring-2 ring-[#0B2E4F]"
+                  ? "ring-2 ring-[#D4AF37]"
                   : "hover:ring-1 hover:ring-gray-400"
               }`}
             >
-              <div className="flex h-[90px] w-[90px] items-center justify-center overflow-hidden">
-                <img
-                  src={img}
-                  alt={`${productName} thumbnail ${index + 1}`}
-                  className="h-full w-full object-contain"
-                />
-              </div>
+              <img
+                src={img}
+                alt={`${productName} thumbnail ${index + 1}`}
+                className="max-h-full max-w-full object-contain"
+              />
             </button>
           ))}
         </div>

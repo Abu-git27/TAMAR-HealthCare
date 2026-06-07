@@ -13,11 +13,7 @@ type Product = {
   images?: string[];
 };
 
-export default function ProductFilterGrid({
-  products,
-}: {
-  products: Product[];
-}) {
+export default function ProductFilterGrid({ products }: { products: Product[] }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
@@ -29,14 +25,12 @@ export default function ProductFilterGrid({
   const filteredProducts = products.filter((product) => {
     const searchText = search.toLowerCase();
 
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchText) ||
-      product.category.toLowerCase().includes(searchText) ||
-      product.description.toLowerCase().includes(searchText);
-
-    const matchesCategory = category === "All" || product.category === category;
-
-    return matchesSearch && matchesCategory;
+    return (
+      (product.name.toLowerCase().includes(searchText) ||
+        product.category.toLowerCase().includes(searchText) ||
+        product.description.toLowerCase().includes(searchText)) &&
+      (category === "All" || product.category === category)
+    );
   });
 
   return (
@@ -44,19 +38,19 @@ export default function ProductFilterGrid({
       <div className="mb-10 grid gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-md md:grid-cols-2">
         <input
           type="text"
-          placeholder="Search products by name, category, or description..."
+          placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B2E4F]"
+          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#0B2E4F] placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-[#D4AF37]"
         />
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-[#0B2E4F]"
+          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#0B2E4F] outline-none focus:ring-2 focus:ring-[#D4AF37]"
         >
           {categories.map((cat) => (
-            <option key={cat} value={cat}>
+            <option key={cat} value={cat} className="bg-white text-[#0B2E4F]">
               {cat}
             </option>
           ))}
