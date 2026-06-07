@@ -2,10 +2,6 @@ import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import ProductFilterGrid from "@/components/ProductFilterGrid";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const runtime = "nodejs";
-
 type ProductType = {
   _id: string;
   id: string;
@@ -37,7 +33,7 @@ async function getProducts(): Promise<ProductType[]> {
       name: product.name,
       category: product.category,
       description: product.description,
-      image: images[0] || "",
+      image: product.image || images[0] || "",
       images,
     };
   });
